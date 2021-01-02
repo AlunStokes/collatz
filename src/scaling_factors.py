@@ -87,7 +87,7 @@ def subtract_tuple(a, b):
 
 if __name__ == '__main__':
 
-    #A is the set of lengths of |A| we are looking at scaling factors of 4^a - 3^a for
+    '''#A is the set of lengths of |A| we are looking at scaling factors of 4^a - 3^a for
     A = range(3, 30)
     #W holds the set of w such that w(4^a-3^a) in Image(Ra) for each a, up to w = 2000
     W = []
@@ -117,4 +117,4 @@ if __name__ == '__main__':
             #Note that other anomolies will show up (2 skips. for example)
             #continue
         for i in P[p]:
-            print('\t{}: {}'.format(len(i) + 1, i))
+            print('\t{}: {}'.format(len(i) + 1, i))'''

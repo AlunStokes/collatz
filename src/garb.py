@@ -1,8 +1,9 @@
-from math import sqrt, log, log2
+from math import sqrt, log, log2, ceil
 from test_r import *
 from scaling_factors import *
 from utils import *
 import itertools
+from self_ref import get_self_cont_multi
 
 def is_prime(n):
     if n == 2:
@@ -137,19 +138,183 @@ def all_squares_up_to(U):
         n += 1
     return L
 
+def is_subset(A, B):
+    A = set(A)
+    B = set(B)
+    for a in A:
+        if a not in B:
+            return False
+    return True
+
+def num_diff(a, b):
+    if len(a) != len(b):
+        raise Exception('Must be same size')
+    n = 0
+    for i, j in zip(a, b):
+        if i != j:
+            n += 1
+    return n
+
+#Returns the w for which w(2^b-3^a) in image(R_a)
+def get_w_up_to(a, b, w_bound, stop_at_first=False):
+    L = []
+    W = range(1, w_bound + 1, 2)
+    r = 2**b - 3**a
+    for w in W:
+        if in_Rn(w*r, a):
+            L.append(w)
+            if stop_at_first:
+                break
+    return L
+
+def has_shared_element(A, B):
+    for a in A:
+        if a in B:
+            return True
+    return False
+
+def egcd(a, b):
+    if a == 0:
+        return (b, 0, 1)
+    else:
+        g, y, x = egcd(b % a, a)
+        return (g, x - (b // a) * y, y)
+
+def mod_inv(a, m):
+    g, x, y = egcd(a, m)
+    if g != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return x % m
+
+def all_equal(A, n):
+    for a in A:
+        if a != n:
+            return False
+    return True
+
 if __name__ == '__main__':
-    u = 2
-    while u < 60 :
-        U = 2**u
-        S = all_squares_up_to(U)
+
+    w = 10
+    K = range(1, 12)
+    S = []
+    for k in K:
+        d = 3
+        if w % 3 == 2:
+            d = 6
+        S.append((4**k * w - d // 3) // d)
+    Sw = [3 * s + 1 for s in S]
+    r = w - mod_inv(3, w)
+    Sr = [(s - r) // w for s in S]
+    print(S)
+    print(Sw)
+    print(Sr)
+
+
+
+    '''f = lambda x: 2*x + 4
+    a = 7
+
+    R = get_all_r(a, f(a))
+    R = [r for r in R if r % 2 == 0]
+    T = num_and_mult(R)
+    A = [(inv_r(t[0], a), inv_r(t[1], a)) for t in T]
+    for a in A:
+        if num_diff(*a) == 1:
+            print('{}: {}'.format(r_func(a[0]), a[0]))
+            print('{}: {}'.format(r_func(a[1]), a[1]))
+            print('')'''
+
+
+    #KEEP ME
+    #Check for stabilizatyion in linear pattern in b of a for mult factors
+    '''f = lambda x : 2*x + 4
+
+    N = 20
+    D = {}
+
+    A = range(1, N)
+    for a in A:
+        b = f(a)
+        W = range(1, min(1000, 3**a), 2)
         L = []
-        for s in S:
-            n = 0
-            while s * 2**n <= U:
-                L.append((s + 3)*2**n)
-                n += 1
-        #print(L)
-        r = len(L) / U
-        c = (sqrt(2**(1-sqrt(U)) * U)-2*sqrt(U)) / ((sqrt(2) - 2) * U)
-        print('{} ({}): {}, {} - {}'.format(U, len(L), r, c, r < c))
-        u += 1
+        for w in W:
+            r = w * (2**b - 3**a)
+            if in_Rn(r, a):
+                L.append(w)
+                #print('{}: {}'.format(w, r))
+            if len(L) > 0:
+                D[(a,b)] = L
+
+    for d in D:
+        a = d[0] + 1
+        b = f(a)
+        if (a, b) in D:
+            print('{}: {} - {}'.format(d, D[d], is_subset(D[d], D[(a, b)])))
+        else:
+            print('{}: {}'.format(d, D[d]))'''
+
+    #check width for which w(2^b-3^a) in image(R_a) for b=2x+k has solutions as a grows
+    '''P = []
+    A = range(1, 20)
+    for a in A:
+        print(a)
+        K = range(-a//2 - 1, a//2 + 2)
+        L = []
+        for k in K:
+            f = lambda x: 2*x + k
+            b = f(a)
+            W = get_w_up_to(a, b, 100000, stop_at_first=True)
+            if len(W) > 0:
+                L.append(k)
+        P.append(L)
+    P_min = [min(p) for p in P]
+    P_max = [max(p) for p in P]
+    plt.plot(list(range(1, len(P_min) + 1)), P_min)
+    plt.plot(list(range(1, len(P_max) + 1)), P_max)
+    plt.show()'''
+
+
+    '''#Something about self referential sequences
+    D = []
+    S = get_self_cont_multi(10**6)
+    for s in S:
+        L = []
+        P = range(100)
+        for p in P:
+            w = s * 2**p
+            if w % 3 == 0:
+                continue
+            V = collatz_phi(w)['values']
+            d = 3
+            if w % 3 == 2:
+                d = 6
+            S = []
+            k = 1
+            while True:
+                r = (w * 4**k - d // 3) // d
+                if r > max(V):
+                    S.append(r)
+                    break
+                S.append(r)
+                k += 1
+            r = w - mod_inv(3, w)
+            Vw = [v % w for v in V]
+            if r in Vw:
+                L.append(p)
+                D.append(w)
+                #print('{}'.format(V[Vw.index(r)]))
+                #print('{}'.format(S))
+        print('{}: {}'.format(s, L))
+    print(D)
+    print('')
+
+    for w in D:
+        V = collatz_phi(w)['values'][1:]
+        Vm = [v % (w // 2**v2(w)) for v in V]
+        d = 3
+        if w % 3 == 2:
+            d = 6
+        r = w - mod_inv(3, w)
+        print('{} ({}): {}'.format(w, r, Vm))
+        print('')'''

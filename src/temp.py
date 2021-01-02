@@ -15,10 +15,9 @@ if __name__ == '__main__':
         print('')
         n += 1'''
 
-    '''plt.figure(num=None, figsize=(16, 6), dpi=140, facecolor='w', edgecolor='k')
-
+    plt.figure(num=None, figsize=(16, 6), dpi=140, facecolor='w', edgecolor='k')
     S = [4**n - 3**n for n in range(1, 15)]
-    R = get_all_r(6, 18)
+    R = get_all_r(6, 16)
     R = [r for r in R if r % 2 == 1]
     #R = sorted(R)
     #print(sorted(R))
@@ -26,7 +25,6 @@ if __name__ == '__main__':
     #print(M)
     #print(R)
     U = sorted(list(set([m[0] for m in M])))
-
     #U = [u for u in U if u % 2 == 1]
     #print(U)
     i = 0
@@ -59,11 +57,10 @@ if __name__ == '__main__':
         plt.title(T)
         plt.savefig('./images/graph_pointers/{}.png'.format(i))
         #plt.show()
-
         plt.clf()
-        i += 1'''
+        i += 1
 
-    u = 3
+    '''u = 3
     while u < 20:
         #print('{}^{}'.format(2, u))
         N = 0
@@ -92,20 +89,16 @@ if __name__ == '__main__':
                 #print('{}: BAD'.format(n))
             n += 1
         print('{},{}'.format(2**u, N / U))
-        u += 1
+        u += 1'''
 
     '''a = 9
     b = 18
-
     R = get_all_r(a, b)
     M = num_and_mult(R)
-
     #print(M)
-
     for m in M:
         A1 = inv_r(m[0], a)
         A2 = inv_r(m[1], a)
-
         if A1[-1] >= A2[-1] and (m[1] // m[0]) % 2 == 1:
             print('{}: {}'.format(m, m[1] // m[0]))
             print('{} - {}'.format(A1, sum(A1)))

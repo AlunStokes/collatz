@@ -107,6 +107,9 @@ if __name__ == '__main__':
     plt.plot(Xt, Yt)
     plt.show()'''
 
+    print(r_func((1,3,5)))
+    exit()
+
     B = range(1, 20)
     for b in B:
         A = range(1, b + 1)

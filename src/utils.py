@@ -122,6 +122,17 @@ def collatz(x):
 
     return res
 
+def vp(x, p):
+    if x == 0:
+        return 0
+    if x == 1:
+        return 0
+    n = 0
+    while x % p == 0:
+        x //= p
+        n += 1
+    return n
+
 def collatz_accel(x):
     code = ''
     n = 0
@@ -130,10 +141,10 @@ def collatz_accel(x):
     while x != 1:
         n += 1
         if x % 2 == 1:
-            x = (3*x + 1) // 2
+            x = (3*x + 1) // 2**(vp(3*x + 1, 2))
             code += '1'
         else:
-            x = x // 2
+            x = x // 2**(vp(x, 2))
             code += '0'
         l.append(x)
 
@@ -147,22 +158,23 @@ def collatz_accel(x):
 
 def collatz_phi(x):
     code = ''
-    n = 0
+    iter = 0
 
     l = [x]
     while x != 1:
-        n += 1
+        iter += 1
         if x % 2 == 1:
             n = phi(x)
             x = (3*x + 1) // 2**n
             code += '1'
         else:
-            x = x // 2
+            n = v2(x)
+            x = x // 2**n
             code += '0'
         l.append(x)
 
     res = {
-    'iter': n,
+    'iter': iter,
     'code': code,
     'values': l
     }
@@ -314,6 +326,15 @@ def plot_paths(N):
         plot_path(n, show=False)
     plt.legend()
     plt.show()
+
+def v2(x):
+    if x == 0:
+        return 0
+    i = 1
+    while True:
+        if x % 2**i != 0:
+            return i - 1
+        i += 1
 
 def plot_iteration(n, show=True):
     V = collatz(n)['values']

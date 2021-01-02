@@ -265,7 +265,7 @@ def num_and_mult(P):
 
 if __name__ == '__main__':
 
-    a = 5
+    a = 4
     b = 2*a + 8
 
     w = 5
