@@ -2,6 +2,9 @@ from math import log2, log
 
 import matplotlib.pyplot as plt
 
+from utils import collatz_accel, vp
+from test_r import in_Rn, inv_r, r_func
+
 #2-adic valuation function on the natural numbers
 def v2(x):
     if x == 0:
@@ -85,6 +88,31 @@ def seq_to_diff(s):
 def subtract_tuple(a, b):
     return tuple([i - j for i,j in zip(a, b)])
 
+def check_inv(w, a, b):
+    print('{}'.format((w, a, b)))
+    s = 0
+    wp = w
+    LHS = w * 2**b - wp*3**a
+    done = False
+    while b > 0:
+        m = vp(3*wp + 1, 2)
+        wp = (3*wp + 1) // 2**m
+        a -= 1
+        if m > b:
+            print('m = {}'.format(m))
+            print('LHS = {}'.format(w * 2**b - wp*3**a * 2**m))
+            done = True
+            break
+        b -= m
+        s += m
+        LHS = w * 2**b - wp*3**a
+        print('{}: {} - {} | {}'.format(s, (w, b), (wp, a), LHS))
+    if not done:
+        m = vp(w * 2**b - wp*3**a, 2)
+        s += m
+        print('{}: m = {}'.format(s, m))
+
+
 if __name__ == '__main__':
 
     '''#A is the set of lengths of |A| we are looking at scaling factors of 4^a - 3^a for
@@ -118,3 +146,68 @@ if __name__ == '__main__':
             #continue
         for i in P[p]:
             print('\t{}: {}'.format(len(i) + 1, i))'''
+
+
+
+    #Counterexample
+    #31 - 39, 62
+    #31 - 39, 63
+    w = 31
+    a = 39
+    b = 62
+    check_inv(w, a, b)
+    I = inv_r(w*(2**b - 3**a), a)
+    print(I)
+    plt.plot(list(I))
+    plt.plot([2*x for x in range(len(I))])
+    plt.plot([b for x in range(len(I))])
+    plt.show()
+    exit()
+
+    '''w = 83
+    a = 41
+    b = 66
+    q = w * (2**b - 3**a)
+    A = inv_r(q, a)
+    print(A)
+    print([A[i] - A[i - 1] for i in range(1, len(A))])
+    r = r_func(A)
+    print(r)
+    print(q)
+    exit()'''
+
+    #Counterexample generator
+    w = 31
+    B = range(1, 150)
+    for b in B:
+        A = range(1, b + 1)
+        for a in A:
+            if in_Rn(w * (2**b - 3**a), a):
+                print((a, b))
+
+
+
+
+    '''U = 200
+
+    T = []
+
+    B = range(1, 80)
+    for b in B:
+        A = range(1, b + 1)
+        for a in A:
+            W = get_wab(a, b, U)
+            #print('{}: {}'.format((a, b), W))
+            T += W
+        #print('')
+
+    T = sorted(list(set(T)))
+    L = list(range(1, U + 1, 2))
+    L = sorted(list(set(L) - set(T)))
+    L = [l for l in L if l % 3 != 0]
+    print("w for which w(2^b-3^a) is a-special")
+    print(T)
+    print("")
+    print("w not equiv to 0 mod 3 that are not a-special")
+    print(L)
+    W = [31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]'''

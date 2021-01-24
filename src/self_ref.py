@@ -4,6 +4,24 @@ from math import floor
 from multiprocessing.pool import Pool
 from functools import partial
 
+import matplotlib.pyplot as plt
+import numpy as np
+
+def prime_fac(n):
+    if n < 0:
+        n = -n
+    i = 2
+    factors = []
+    while i * i <= n:
+        if n % i:
+            i += 1
+        else:
+            n //= i
+            factors.append(i)
+    if n > 1:
+        factors.append(n)
+    return factors
+
 def vp(x, p):
     if x == 0:
         return 0
@@ -163,6 +181,40 @@ def print_arrs(A, B):
     print(sa)
     print(sb)
 
+def isCSelfContained(n):
+    d = n
+    while n > 1:
+        if n % 2 == 1:
+            n = 3*n + 1
+        else:
+            n //= 2
+        if n % d == 0:
+            return True
+    return False
+
+#w is starting point
+#depth is number of steps backwards
+#height is highest power of 2 to multiply by
+def backward_collatz(w, depth, height):
+    L = [[w]]
+    i = 0
+    while i < depth:
+        l = []
+        for p in L[-1]:
+            j = 1
+            pref = p
+            while j <= height:
+                p = 2**j * pref - 1
+                if p % 3 != 0:
+                    j += 1
+                    continue
+                p //= 3
+                l.append(p)
+                j += 1
+        L.append(l)
+        i += 1
+    return L
+
 
 if __name__ == '__main__':
 
@@ -194,9 +246,68 @@ if __name__ == '__main__':
             print('')
         print('--------')'''
 
-    #Get self contained numbers up to bound, multi refers to multiprocessing
-    W = get_self_cont_multi(10**9)
-    print(W)
+    '''L = backward_collatz(379837, 16, 6)
+    L_flat = [i for s in L for i in s]
+    #for l in L:
+        #print(l)
+
+    print(max(L_flat))
+
+    for w in L_flat:
+        if isCSelfContained(w):
+            print(w)'''
+
+    W = [31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    #W = [w for w in W if w % 2 == 1]
+
+    for w in W:
+        d = 3
+        if w % 3 == 2:
+            d = 6
+        r = (4**1*w - d//3)//d
+        O = collatz(w)['values'][1:]
+        Ow = [o % w for o in O]
+        v = O[Ow.index(0) - 1]
+        p = (v - r) // w
+        q = O[Ow.index(0)] // w
+        print('{} ({}): {}'.format(w, q, p))
+
+    '''W = range(1, 10**2)
+    for w in W:
+        if w % 3 == 0:
+            continue
+        d = 3
+        if w % 3 == 2:
+            d = 6
+        O = collatz_accel(w)['values']
+        Sw = [(2**1*w - d//3) // d]
+        m = max(O)
+        k = 2
+        while Sw[-1] < m:
+            Sw.append((2**k*w - d//3) // d)
+            k += 1
+        if len(set(Sw).intersection(set(O))) != 0:
+            print('{}: {}'.format(w, Sw))
+        print('{}: {}'.format(w, Sw))'''
+
+
+    '''#Get self contained numbers up to bound, multi refers to multiprocessing
+    #W = get_self_cont_multi(10**7, workers=8)
+    W = [31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    W = [w for w in W if w % 2 == 1]
+    Worb = [collatz_accel(w)['values'] for w in W]
+    for w, orb in zip(W, Worb):
+        print('{}: {}'.format(w, orb))
+        print('')
     #Get numbers with -3^-1 in their P orbit
     #P = get_inv_P_orbit(10**9, True)
-    #print(P)
+    #print(P)'''
+
+    '''W = [31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    W = [w for w in W if w % 2 == 1]
+    for w in W:
+        r = w - mod_inv(3, w)
+        print('{}: {}'.format(w, r))
+
+    plt.plot(np.log(W))
+    plt.show()'''

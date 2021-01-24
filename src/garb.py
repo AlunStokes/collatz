@@ -4,6 +4,7 @@ from scaling_factors import *
 from utils import *
 import itertools
 from self_ref import get_self_cont_multi
+import numpy as np
 
 def is_prime(n):
     if n == 2:
@@ -193,22 +194,251 @@ def all_equal(A, n):
             return False
     return True
 
+def find_lines(R):
+    R = R.copy()
+    L = {}
+    while len(R) > 0:
+        r = R[0]
+        del R[0]
+        p = r[1] - 2*r[0]
+        L[p] = [r]
+        R_ = R.copy()
+        i = 0
+        while i < len(R):
+            r_ = R[i]
+            if 2*r_[0] + p == r_[1]:
+                L[p].append(r_)
+                del R[i]
+                continue
+            i += 1
+    return L
+
+def get_invs(w, U):
+    I = []
+    M = range(0, U, 1)
+    for m in M:
+        r = 2**m % w
+        inv = mod_inv(3, w)
+        r *= inv
+        r %= w
+        r = w - r
+        r %= w
+        if r not in I:
+            I.append(r)
+    I = sorted(I)
+    return I
+
+
 if __name__ == '__main__':
 
-    w = 10
-    K = range(1, 12)
-    S = []
-    for k in K:
+    W = [31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    W = [w for w in W if w % 2 == 1]
+    for w in W:
+        O = collatz_accel(w)['values'][1:]
+        Ow = [o % w for o in O]
+        print('{}: {}'.format(w, prime_fac(O[Ow.index(0)] // w)))
+
+
+
+    #Check linear relations in solutions to first r equation
+    '''W = [1, 2, 4, 31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    W = [w for w in W if w % 2 == 1]
+    R = {}
+    for w in W:
+        R[w] = []
+
+    for w in W:
+        B = range(1, 600)
+        for b in B:
+            A = range(1, b + 1)
+            for a in A:
+                if in_Rn(w * (2**b - 3**a), a):
+                    R[w].append((a, b))
+
+    for w in R:
+        print('w = {}'.format(w))
+        L = find_lines(R[w])
+        #print(L)
+        print(sorted(list(L.keys())))
+        print('')'''
+    #Charting for the above
+    '''for w in R:
+        plt.title('{}'.format(w))
+        L = find_lines(R[w])
+        for k in L:
+            if len(L[k]) == 1:
+                plt.plot([x[0] for x in L[k]], [x[1] for x in L[k]], '.', label='2x + ({})'.format(k))
+            else:
+                plt.plot([x[0] for x in L[k]], [x[1] for x in L[k]], label='2x + ({})'.format(k))
+            plt.legend()
+        #plt.xlim(left=-2)
+        plt.show()'''
+
+    #Check second r equation *****
+    '''R = {}
+    W = [1, 31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    W = [w for w in W if w % 2 == 1]
+    for w in W:
+        R[w] = []
+    for w in W:
+        B = range(1, 40)
+        for b in B:
+            A = range(1, b + 1)
+            for a in A:
+                K = range(1, b)
+                for k in K:
+                    if w % 3 == 1:
+                        r = w * (2**(b + 2*k) - 3**(a + 1)) - 2**b
+                        if r % 3 != 0:
+                            continue
+                        r //= 3
+                    else:
+                        r = w * (2**(b + 2*k) - 2*3**(a + 1)) - 2**(b + 1)
+                        if r % 6 != 0:
+                            continue
+                        r //= 6
+                    if in_Rn(r, a):
+                        #print((a, b, k))
+                        R[w].append((a, b))
+
+    for w in R:
+        print('w = {}'.format(w))
+        L = find_lines(R[w])
+        print(L)
+        #print(sorted(list(L.keys())))
+        print('')'''
+
+
+    '''W = range(1, 10**2)
+    for w in W:
+        if w % 3 == 0:
+            print('')
+            continue
+        O = collatz_accel(w)['values']
+        O = [o % w for o in O]
+        I = get_invs(w, 100)
+        L = set(I).intersection(set(O))
+        print('{}: {}'.format(w, L))'''
+
+
+
+    #Charting both EQs
+    '''W = [1, 31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    W = [w for w in W if w % 2 == 1]
+    R = {}
+    for w in W:
+        R[w] = []
+
+    for w in W:
+        B = range(1, 400)
+        for b in B:
+            A = range(1, b + 1)
+            for a in A:
+                if in_Rn(w * (2**b - 3**a), a):
+                    R[w].append((a, b))
+    for w in R:
+        print('w = {}'.format(w))
+        L = find_lines(R[w])
+        #for k in L:
+            #print('{}: {}'.format(k, L[k]))
+        print(sorted(list(L.keys())))
+        print('')
+
+    print('--------------------')
+
+    Q = {}
+    W = [1, 31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    W = [w for w in W if w % 2 == 1]
+    for w in W:
+        Q[w] = []
+    for w in W:
+        B = range(1, 80)
+        for b in B:
+            A = range(1, b + 1)
+            for a in A:
+                K = range(1, b)
+                for k in K:
+                    if w % 3 == 1:
+                        r = w * (2**(b + 2*k) - 3**(a + 1)) - 2**b
+                        if r % 3 != 0:
+                            continue
+                        r //= 3
+                    else:
+                        r = w * (2**(b + 2*k) - 2*3**(a + 1)) - 2**(b + 1)
+                        if r % 6 != 0:
+                            continue
+                        r //= 6
+                    if in_Rn(r, a):
+                        #print((a, b, k))
+                        Q[w].append((a, b))
+    for w in Q:
+        print('w = {}'.format(w))
+        L = find_lines(Q[w])
+        #for k in L:
+            #print('{}: {}'.format(k, L[k]))
+        print(sorted(list(L.keys())))
+        print('')'''
+    #Charting for the above
+    '''for w in R:
+        plt.title('{}'.format(w))
+        L = find_lines(R[w])
+        for k in L:
+            if len(L[k]) == 1:
+                plt.plot([x[0] for x in L[k]], [x[1] for x in L[k]], '.', label='2x + ({})'.format(k))
+            else:
+                plt.plot([x[0] for x in L[k]], [x[1] for x in L[k]], label='2x + ({})'.format(k))
+        L = find_lines(Q[w])
+        for k in L:
+            if len(L[k]) == 1:
+                plt.plot([x[0] for x in L[k]], [x[1] for x in L[k]], 'k.', label='2x + ({})'.format(k))
+            else:
+                plt.plot([x[0] for x in L[k]], [x[1] for x in L[k]], 'k', label='2x + ({})'.format(k))
+        #plt.legend()
+        #plt.xlim(left=-2)
+        plt.savefig('./images/eq_comp_charts/{}.png'.format(w))
+        plt.show()
+        plt.clf()'''
+
+
+
+
+
+    '''w = 1
+    while w < 10**7:
+        if w % 3 == 0:
+            w += 2
+            continue
         d = 3
         if w % 3 == 2:
             d = 6
-        S.append((4**k * w - d // 3) // d)
-    Sw = [3 * s + 1 for s in S]
-    r = w - mod_inv(3, w)
-    Sr = [(s - r) // w for s in S]
-    print(S)
-    print(Sw)
-    print(Sr)
+        O = collatz_accel(w)['values']
+        K = range(1, 10)
+        for k in K:
+            r = (4**k * w - d//3)//d
+            if r in O:
+                print((w, k))
+                print('')
+        w += 2'''
+
+    '''w = 31
+
+    B = range(1, 40)
+    for b in B:
+        A = range(1, b + 1)
+        for a in A:
+            K = range(1, b)
+            for k in K:
+                r = w * (2**(b + 2*k) - 3**(a + 1)) - 2**b
+                if r % 3 != 0:
+                    continue
+                r //= 3
+                if in_Rn(r, a):
+                    print((a, b, k))
+                    print(r)
+                    I = inv_r(r, a)
+                    print(I)
+                    print('')'''
+
 
 
 
