@@ -112,12 +112,12 @@ if __name__ == '__main__':
     V = []
     C = []
 
-    bins = all_bin_len(4)
+    bins = all_bin_len(3)
 
     for B in bins:
         C.append(B[::-1])
         r = factor(collatz(x, B[::-1][:-1]))
-        print(r)
+        #print(r)
         m,n,d = tokenize_exp(r)
         if B[0] == '0':
             g, p, q = eea(2*d, m)
@@ -136,7 +136,7 @@ if __name__ == '__main__':
         V.append(v)
 
     R = [expand(collatz(v, (c))) for v,c in zip (V,C)]
-    print(len([x for x in R if R.count(x) == 1]))
+    #print(len([x for x in R if R.count(x) == 1]))
 
     s1 = max([len(str(s)) for s in V])
     s2 = max([len(str(s)) for s in R])
@@ -148,7 +148,7 @@ if __name__ == '__main__':
         matches = int('0b' + c[::-1], 2) == tokenize_relation(v)[1]
         #print(matches)
         if matches:
-            print('{}: {}{} ->  {}{}*'.format(c[::-1], v, ' ' * (s1 - len(str(v)) + 1), r, ' ' * (s2 - len(str(r)) + 1)))
+            print('{}: {}{} ->  {}{}*'.format(c, v, ' ' * (s1 - len(str(v)) + 1), r, ' ' * (s2 - len(str(r)) + 1)))
         else:
             n += 1
-            print('{}: {}{} ->  {}{}'.format(c[::-1], v, ' ' * (s1 - len(str(v)) + 1), r, ' ' * (s2 - len(str(r)) + 1)))
+            print('{}: {}{} ->  {}{}'.format(c, v, ' ' * (s1 - len(str(v)) + 1), r, ' ' * (s2 - len(str(r)) + 1)))

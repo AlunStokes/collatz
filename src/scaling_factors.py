@@ -147,6 +147,37 @@ if __name__ == '__main__':
         for i in P[p]:
             print('\t{}: {}'.format(len(i) + 1, i))'''
 
+    #For latex tables
+    '''K = [-1, 0, 1]
+    Ws = [[]]
+    k = -2
+    for a in range(6, 12):
+        s = "{} & ".format(a)
+        for k in K:
+            W = get_wab(a, 2*a + k, 100)
+            c = 0
+            for w in Ws[-1]:
+                if not w in W:
+                    c += 1
+            Ws.append(W)
+            #print('{}: {}'.format(W, c))
+            s += "\\{{{}\\}} & ".format(str(W)[1:-1])
+        s = s[:-3]
+        s += "\\\\"
+        print(s)
+    exit()'''
+
+    S = [(4**k - 1)//3 for k in range(1, 7)]
+    a = 40
+    for k in range(-5, 6):
+        W = get_wab(a, 2*a + k, 100)
+        T = set(S).intersection(set(W))
+        if len(T) > 0:
+            print((a, 2*a + k))
+            print(T)
+            print()
+
+    exit()
 
 
     #Counterexample

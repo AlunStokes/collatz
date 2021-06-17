@@ -1,0 +1,3 @@
+TEST PRINT
+Checking up to 10^15
+25717.593273 seconds (386.87 k allocations: 20.201 MiB)

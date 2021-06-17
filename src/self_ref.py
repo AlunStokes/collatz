@@ -7,6 +7,8 @@ from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scaling_factors import get_wa, get_wab
+
 def prime_fac(n):
     if n < 0:
         n = -n
@@ -129,6 +131,93 @@ def get_self_cont_multi(bound, workers=8):
 
     return sorted(R)
 
+#Utility function for multiprocessing pseudo_self_cont
+def _get_pseudo_self_cont(bound, workers, offset, verbose=False):
+    L = []
+    n = 2 * offset + 1
+    if offset == 1 and verbose:
+        t0 = time.time()
+        last = 1
+        while n <= bound:
+            if 100 * n / bound > last:
+                last += 1
+                if verbose:
+                    print('{:.1f}% - {:.2f}s'.format(100 * n / bound, time.time() - t0))
+                t0 = time.time()
+            r = ((n % 3) * n - 1)//3
+            V = collatz(n)['values'][1:]
+            V = [v % n for v in V]
+            if r in V:
+                L.append(n)
+            n += 2 * workers
+    else:
+        while n <= bound:
+            r = ((n % 3) * n - 1)//3
+            V = collatz(n)['values'][1:]
+            V = [v % n for v in V]
+            if r in V:
+                L.append(n)
+            n += 2 * workers
+    return L
+
+#Returns all pseudo-self-contained numbers less than bound. Workers is number of workers to use in multiprocessing
+def get_pseudo_self_cont_multi(bound, workers=8):
+    f = partial(_get_pseudo_self_cont, bound, workers)
+
+    params = list(range(workers))
+    pool = Pool()
+    res = pool.map(f, params)
+    res = [r for s in res for r in s]
+
+    R = [r for r in res]
+    # add in even numbers
+    for r in res:
+        p = 1
+        while True:
+            V = collatz(r * 2**p)['values'][1:]
+            V = [v % (r * 2**p) for v in V]
+            if 0 not in V:
+                break
+            R.append(r*2**p)
+            p += 1
+
+    return sorted(R)
+
+#Utility function for multiprocessing pseudo_self_cont
+def _get_neg_inv(bound, workers, k, offset, verbose=False):
+    P = prime_fac(k)
+    L = []
+    n = (k + 1) + offset
+    while n <= bound:
+        is_div = False
+        for p in P:
+            if n % p == 0:
+                is_div = True
+                n += workers
+                break
+        if is_div:
+            continue
+        r = n - mod_inv(k, n)
+        V = collatz(n)['values']
+        V = [v % n for v in V]
+        if r in V:
+            L.append(n)
+        n += workers
+    return L
+
+#Returns all pseudo-self-contained numbers less than bound. Workers is number of workers to use in multiprocessing
+def get_neg_inv_multi(bound, k, workers=8):
+    f = partial(_get_neg_inv, bound, workers, k)
+
+    params = list(range(workers))
+    pool = Pool()
+    res = pool.map(f, params)
+    res = [r for s in res for r in s]
+
+    R = [r for r in res]
+
+    return sorted(R)
+
 #gcd by euclidean algorithm
 def egcd(a, b):
     if a == 0:
@@ -246,20 +335,10 @@ if __name__ == '__main__':
             print('')
         print('--------')'''
 
-    '''L = backward_collatz(379837, 16, 6)
-    L_flat = [i for s in L for i in s]
-    #for l in L:
-        #print(l)
-
-    print(max(L_flat))
-
-    for w in L_flat:
-        if isCSelfContained(w):
-            print(w)'''
-
-    W = [31, 62, 83, 166, 293, 347, 586, 671, 694, 1342, 2684, 19151, 38302, 2025797, 4051594]
-    #W = [w for w in W if w % 2 == 1]
-
+    W = [31, 62, 83, 166, 293, 586, 347, 694, 671, 1342, 2684, 19151, 38302, 2025797, 4051594]
+    W = [w for w in W if w % 2 == 1]
+    m = 3
+    #print('~= mod {}'.format(m))
     for w in W:
         d = 3
         if w % 3 == 2:
@@ -270,7 +349,11 @@ if __name__ == '__main__':
         v = O[Ow.index(0) - 1]
         p = (v - r) // w
         q = O[Ow.index(0)] // w
-        print('{} ({}): {}'.format(w, q, p))
+        #print('{} ~= {} ({} ~= {}): {} ~= {}'.format(w, w % m, q, q % m, p, p % m))
+        #print('w = {}: cont(w) = {} | pw = {} | r = {}'.format(w, q, p, r))
+        #print('w = {} (~= {}, {} mod 3,6): cont(w) = {} (~= {}, {} mod 3,6)'.format(w, w%3, w%6, q, q%3, q%6))
+        #print('{} -> {}'.format(w%3, q%3))
+        print('{} ({}):{}, {} -> {}, {}'.format(w, q, w%3, w%6, q%3, q%6))
 
     '''W = range(1, 10**2)
     for w in W:

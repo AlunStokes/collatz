@@ -156,6 +156,29 @@ def collatz_accel(x):
 
     return res
 
+def collatz_T(x):
+    code = ''
+    n = 0
+
+    l = [x]
+    while x != 1:
+        n += 1
+        if x % 2 == 1:
+            x = (3*x + 1) // 2
+            code += '1'
+        else:
+            x = x // 2
+            code += '0'
+        l.append(x)
+
+    res = {
+    'iter': n,
+    'code': code,
+    'values': l
+    }
+
+    return res
+
 def collatz_phi(x):
     code = ''
     iter = 0

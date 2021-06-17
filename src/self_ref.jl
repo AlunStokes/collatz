@@ -1,13 +1,12 @@
 using Printf
 using Distributed
 
-addprocs(4)
+addprocs(8)
 
 function collatz(x)
     l = Int64[]
     push!(l,x)
     while x > 1
-        println(l)
         if x % 2 == 0
             x = x ÷ 2
         else
@@ -45,7 +44,6 @@ function getCSelfCont(N)
     l = Int64[]
     n = 1
     while n <= N
-        println(D)
         if isCSelfCont(n)
             push!(l, n)
         end
@@ -54,12 +52,7 @@ function getCSelfCont(N)
     return l
 end
 
-#=
+println("alun")
 @time begin
-    println(getCSelfCont(10^1))
-end
-=#
-
-for n in UnitRange{UInt64}(1,10)
-    println(n)
+    println(getCSelfCont(10^7))
 end

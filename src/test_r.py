@@ -2,6 +2,8 @@ from math import sqrt, log2, log
 import operator as op
 from functools import reduce
 from itertools import combinations
+from itertools import permutations
+from itertools import product
 from scipy.special import comb
 from utils import *
 
@@ -122,6 +124,17 @@ def r_func_seq(A):
     return r[::-1]
 
 def inv_r(r, n):
+    if n == 0:
+        if r == 0:
+            return tuple()
+        else:
+            return (-1,)
+    if n == 1:
+        v = vp(r, 2)
+        if 2**v == r:
+            return (v+1,)
+        else:
+            return (-1,)
     L = []
     i = 0
     while i < n:
@@ -160,6 +173,8 @@ def check_hyp(R, n):
     return True
 
 def in_Rn(r, n):
+    if int(r) != r:
+        return False
     if n == 0 and r == 0:
         return True
     elif n == 0 and r != 0:
@@ -262,10 +277,49 @@ def num_and_mult(P):
     return S
 
 
+def factor(n):
+    L = []
+    i = 2
+    while i < int(np.sqrt(n)) + 1:
+        if n % i == 0:
+            L.append(i)
+            L.append(n // i)
+        i += 1
+    #if len(L) == 0:
+        #L.append(n)
+    L = list(sorted(L))
+    return L
+
+def primes_less_than(N):
+    L = [2]
+    n = 3
+    while n < N:
+        if is_prime(n):
+            L.append(n)
+        n += 1
+    return L
+
+def f(a, b):
+    return 2**b - 3**a
+
 
 if __name__ == '__main__':
 
-    a = 4
+    w = 4835
+    L = list(range(12))
+    Ls = [L for _ in range(6)]
+    perms = product(*Ls)
+    for perm in perms:
+        s = 0
+        for i in range(len(perm)):
+            s += 3**(len(perm) - i -1) * 2**perm[i]
+        if s == w:
+            print(perm)
+    exit()
+
+    #Old guyg who goes through combiuations for which w works but largest element is too big
+    #***
+    '''a = 4
     b = 2*a + 8
 
     w = 5
@@ -303,23 +357,115 @@ if __name__ == '__main__':
     #plt.plot(M)
     #plt.show()
     #print(N)
-    #print([2 * (n + 30) for n in N])
+    #print([2 * (n + 30) for n in N])'''
+
+    #Check what happens upon multiplication of numbers in image R_a
+    '''n = 4
+    R = get_all_r(n, 8)
+    R = list(sorted(R))
+    print(R)
+    T = []
+    for r in R:
+        for q in R:
+            if in_Rn(r * q, 2*n - 1):
+                if (r,q) not in T and (q,r) not in T:
+                    T.append((r, q))
+    for t in T:
+        print('{}: {} * {} = {}'.format(t, t[0], t[1], t[0] * t[1]))
+        print('\t{}: {}'.format(t[0], inv_r(t[0], n)))
+        print('\t{}: {}'.format(t[1], inv_r(t[1], n)))
+        print('\t{}: {}'.format(t[0] * t[1], inv_r(t[0] * t[1], 2*n - 1)))
+        print('')'''
+
+    #Check if all numbers in image(R_a) can be factored into other such numbers
+    '''n = 3
+    R = get_all_r(n, 10)
+    R = list(sorted(R))
+    print(R)
+    T = []
+    for r in R:
+        I = inv_r(r, n)
+        F = factor(r)
+        F = F[:len(F)//2]
+        fac = False
+        for f in F:
+            p = r // f
+            q = f
+            i = 1
+            p_fac = False
+            while i < n:
+                if in_Rn(p, i):
+                    p_fac = True
+                    p_I = inv_r(p, i)
+                    break
+                i += 1
+            i = 1
+            q_fac = False
+            while i < n:
+                if in_Rn(q, i):
+                    q_fac = True
+                    q_I = inv_r(q, i)
+                    break
+                i += 1
+            if p_fac and q_fac:
+                fac = True
+                break
+        if fac:
+            print('{} can be factored into {} = {} * {}'.format(r, I, p_I, q_I))
+        else:
+            print('{} is not factorable'.format(r))'''
 
 
+    #checking some numbers in image(R_a)
+    M = 10
+    #a = 5
+    #b = 10
+    T = []
+    B = range(1, M + 1)
+    for b in B:
+        A = range(1, b + 1)
+        for a in A:
+            W = range(1, 100)
+            for w in W:
+                r = w * (2**b - 3**a)
+                if r > 0:
+                    T.append(((a, b, w), r))
 
-    '''a = 4
-    b = 9
-    R = sorted(get_all_r(a, b))
-    A = [inv_r(r, a) for r in R]
+    T.sort(key=lambda x:x[1])
+    #print(T)
+    for t in T:
+        if in_Rn(t[1], t[0][0]):
+            print('{} {} in R_{}'.format(t[1], t[0], t[0][0]))
 
-    P = []
-    for i in range(a, b):
-        P.append([(r, a) for r, a in zip(R, A) if a[-1] == i])
+    #Check which (a,b) allow scaling
+    '''U = 100
+    D = {}
+    for b in range(1, U):
+        print(b)
+        for a in range(1, b + 1):
+            D[(a, b)] = []
+            for w in range(1, 100, 2):
+                if in_Rn(w * (2**b - 3**a), a):
+                    D[(a, b)].append(w)
 
-    print('2^b - 3^a = {}'.format(2**b - 3**a))
+    for d in D:
+        if len(D[d]) > 0:
+            print('{}: {}'.format(d, D[d]))'''
 
-    for i, p in enumerate(P):
-        print(i+a, '({})'.format(len([x for x in p if x[0] % 2 == 1])))
-        for j in p:
-            #if 2 not in prime_fac(j[0]):
-            print('\t{} : {}'.format(j, prime_fac(j[0])))'''
+    #checking for specific linear relation
+    '''p = 0
+    U = 30
+    D = {}
+    for a in range(1, U):
+        b = 2 * a + p
+        D[(a, b)] = []
+        for w in range(1, 2000, 2):
+            if in_Rn(w * (2**b - 3**a), a):
+                D[(a, b)].append(w)
+
+    for d in D:
+        if len(D[d]) > 0:
+            print('{}: {}'.format(d, D[d]))
+
+    plt.plot(D[(U - 1, 2 * (U - 1) + p)])
+    plt.show()'''
